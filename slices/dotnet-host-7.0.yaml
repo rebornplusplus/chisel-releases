@@ -1,4 +1,4 @@
-package: dotnet-host
+package: dotnet-host-7.0
 group: dotnet-host
 slices:
   bins:
