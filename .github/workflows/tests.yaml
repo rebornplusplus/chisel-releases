@@ -1,0 +1,60 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "ubuntu-*"
+  pull_request:
+    branches:
+      - "ubuntu-*"
+  schedule:
+    - cron: "0 0 1 * *"   # run at 00:00 on the first of every month
+
+jobs:
+  planner:
+    name: Determine which jobs to run
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    outputs:
+      # CHISEL_YAML_CHANGED equals true if chisel.yaml is changed
+      CHISEL_YAML_CHANGED: ${{ steps.changed-files.outputs.only_modified }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if chisel.yaml has changed
+        id: changed-files
+        uses: tj-actions/changed-files@v42.0.2
+        with:
+          files: chisel.yaml
+
+  install-slices:
+    name: Install slices in changed files
+    needs: planner
+    if: |
+      needs.planner.outputs.install_all_slices != 'true' &&
+      (github.event_name == 'push' || github.event_name == 'pull_request')
+    strategy:
+      fail-fast: false
+      matrix:
+        ARCH: [amd64, arm64, armhf, i386, ppc64el, riscv64, s390x]
+    uses: ./.github/workflows/install-slices.yaml
+    with:
+      arch: ${{ matrix.ARCH }}
+      install-all-slices: 'false'
+
+  install-all-slices:
+    name: Install all slices
+    needs: planner
+    if: |
+      needs.planner.outputs.install_all_slices == 'true' &&
+      github.event_name == 'schedule'
+    strategy:
+      fail-fast: false
+      matrix:
+        ARCH: [amd64, arm64, armhf, i386, ppc64el, riscv64, s390x]
+    uses: ./.github/workflows/install-slices.yaml
+    with:
+      arch: ${{ matrix.ARCH }}
+      install-all-slices: 'true'

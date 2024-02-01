@@ -1,0 +1,57 @@
+name: Install slices
+
+on:
+  workflow_call:
+    inputs:
+      arch:
+        description: "Package architecture"
+        default: amd64
+        required: true
+        type: string
+      install-all-slices:
+        description: "If true, install all slices in slices/"
+        required: true
+        type: boolean
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    name: "Install"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.0.0
+
+      - name: Install dependencies
+        run: |
+          go install github.com/canonical/chisel/cmd/chisel@latest
+          go install github.com/mikefarah/yq/v4@latest
+
+      - name: Install all slices
+        if: ${{ inputs.install-all-slices == 'true' }}
+        run: |
+          set -e
+          ./.github/scripts/install-slices \
+            --arch "$ARCH" \
+            --release ./ \
+            slices/**
+
+      - name: Changed Files
+        id: changed-files
+        if: ${{ inputs.install-all-slices == 'false' }}
+        uses: tj-actions/changed-files@v42.0.2
+
+      - name: Test installing slices
+        if: ${{ inputs.install-all-slices == 'false' }}
+        env:
+          ARCH: ${{ inputs.arch }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          set -e
+          ./.github/scripts/install-slices \
+            --arch "$ARCH" \
+            --release ./ \
+            $CHANGED_FILES
