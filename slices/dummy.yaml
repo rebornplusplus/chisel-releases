@@ -1,0 +1,6 @@
+package: dummy
+
+slices:
+  bins:
+    contents:
+      /usr/bin/dummy
