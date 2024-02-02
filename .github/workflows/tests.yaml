@@ -1,0 +1,68 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "ubuntu-*"
+  pull_request:
+    branches:
+      - "ubuntu-*"
+  schedule:
+    # run at 00:00 on the first of every month
+    - cron: "0 0 1 * *"
+
+jobs:
+  planner:
+    name: Determine jobs
+    runs-on: ubuntu-latest
+    outputs:
+      INSTALL_ALL_SLICES: ${{ steps.set-output.outputs.install_all }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ github.event_name != 'schedule' }}
+        with:
+          fetch-depth: 0
+
+      - name: Check if chisel.yaml has changed
+        id: changed-files
+        if: ${{ github.event_name != 'schedule' }}
+        uses: tj-actions/changed-files@v42.0.2
+        with:
+          files: chisel.yaml
+
+      - name: Set output
+        id: set-output
+        run: |
+          if [[ ${{ github.event_name }} == "schedule" ]]; then
+            echo "install_all=true" >> $GITHUB_OUTPUT
+          elif [[ -n "${{ steps.changed-files.outputs.only_modified_files }}" ]]; then
+            echo "install_all=true" >> $GITHUB_OUTPUT
+          else
+            echo "install_all=false" >> $GITHUB_OUTPUT
+          fi
+
+  install-changed-slices:
+    name: Install slices in changed files
+    needs: planner
+    if: ${{ needs.planner.outputs.INSTALL_ALL_SLICES != 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ARCH: [amd64, arm64, armhf, i386, ppc64el, riscv64, s390x]
+    uses: rebornplusplus/chisel-releases/.github/workflows/install-slices.yaml@main
+    with:
+      arch: ${{ matrix.ARCH }}
+      install-all-slices: false
+
+  install-all-slices:
+    name: Install all slices
+    needs: planner
+    if: ${{ needs.planner.outputs.INSTALL_ALL_SLICES == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ARCH: [amd64, arm64, armhf, i386, ppc64el, riscv64, s390x]
+    uses: rebornplusplus/chisel-releases/.github/workflows/install-slices.yaml@main
+    with:
+      arch: ${{ matrix.ARCH }}
+      install-all-slices: true
