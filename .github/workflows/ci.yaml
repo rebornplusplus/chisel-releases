@@ -12,4 +12,4 @@ on:
 jobs:
   installability-tests:
     name: Installability tests
-    uses: canonical/chisel-releases/.github/workflows/install-slices.yaml@main
+    uses: rebornplusplus/chisel-releases/.github/workflows/install-slices.yaml@main
