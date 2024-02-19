@@ -1,0 +1,6 @@
+package: foo
+
+slices:
+  bar:
+    contents:
+      /usr/bin/foo:
