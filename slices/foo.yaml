@@ -1,0 +1,6 @@
+package: foo
+
+slices:
+  foo:
+    # No contents or nothing.
+    # Just for testing purposes..
