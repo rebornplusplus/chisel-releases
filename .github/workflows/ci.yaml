@@ -13,6 +13,8 @@ jobs:
   pkg-deps:
     name: Package dependencies
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: "Post PR comment"
         uses: actions/github-script@v6
