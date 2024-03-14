@@ -24,5 +24,7 @@ jobs:
     uses: canonical/chisel-releases/.github/workflows/lint.yaml@main
 
   pkg-deps:
+    if: github.event_name == 'pull_request'
+    permissions: write-all
     name: Package dependencies
     uses: rebornplusplus/chisel-releases/.github/workflows/pkg-deps.yaml@main
