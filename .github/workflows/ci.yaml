@@ -2,7 +2,7 @@ name: CI
 run-name: CI for ${{ github.ref }}
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - "ubuntu-*"
   pull_request_target:
@@ -19,7 +19,6 @@ jobs:
       - name: "Post PR comment"
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.PR_TOKEN }}
           script: |
             const body = 'Diff for ' + context.payload.pull_request.head.sha + ':';
             console.log('Creating new comment...');
