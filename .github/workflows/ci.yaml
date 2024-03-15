@@ -5,6 +5,9 @@ on:
   pull_request:
     branches:
       - "ubuntu-*"
+  pull_request_target:
+    branches:
+      - "ubuntu-*"
 
 jobs:
   cla-check:
