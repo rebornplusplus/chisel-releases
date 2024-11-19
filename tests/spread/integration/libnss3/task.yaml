@@ -18,5 +18,4 @@ execute: |
   for java in `find usr/lib/jvm -name java`; do
       ln -sf /${java} proc/self/exe
       chroot . ${java} -cp . Test
-
   done
