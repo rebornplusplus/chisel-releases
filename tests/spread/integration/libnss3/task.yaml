@@ -1,0 +1,21 @@
+summary: Integration tests for libnss3
+
+environment:
+  SLICE/nss: "nss"
+
+execute: |
+  # Test core slice installation
+  echo "SLICE=${SLICE}"
+  rootfs="$(install-slices openjdk-8-jre-headless_security libnss3_${SLICE})"
+  sudo apt-get update 
+  sudo apt-get install -y openjdk-8-jdk-headless
+  javac Test.java
+  cp Test.class ${rootfs}/
+  cp -r conf ${rootfs}/
+  cd ${rootfs}
+  
+  mkdir -p proc/self
+  for java in `find usr/lib/jvm -name java`; do
+      ln -sf /${java} proc/self/exe
+      chroot . ${java} -cp . Test
+  done
