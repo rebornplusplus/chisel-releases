@@ -4,9 +4,12 @@ essential:
   - hello_copyright
 
 slices:
-  foo:
+  bins:
     essential:
-      - hello_copyright
+      - libc6_libs
+    contents:
+      /usr/bin/hello:
+
   copyright:
     contents:
       /usr/share/doc/hello/copyright:
