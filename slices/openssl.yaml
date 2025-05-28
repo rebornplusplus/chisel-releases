@@ -4,7 +4,7 @@ essential:
   - openssl_copyright
 
 slices:
-  bins:
+  executables:
     essential:
       - libc6_config
       - libc6_libs
