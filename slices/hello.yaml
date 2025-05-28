@@ -4,6 +4,9 @@ essential:
   - hello_copyright
 
 slices:
+  foo:
+    essential:
+      - hello_copyright
   copyright:
     contents:
       /usr/share/doc/hello/copyright:
