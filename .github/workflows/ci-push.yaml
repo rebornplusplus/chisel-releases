@@ -1,0 +1,10 @@
+name: CI push
+run-name: CI push for ${{ github.ref }}
+
+on:
+  push:
+
+jobs:
+  removed-slices:
+    name: Removed slices
+    uses: rebornplusplus/chisel-releases/.github/workflows/removed-slices.yaml@main
