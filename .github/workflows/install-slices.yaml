@@ -30,6 +30,7 @@ env:
       {"ref": "ubuntu-24.10", "chisel-versions": ["v1.0.0","main"]},
       {"ref": "ubuntu-25.04", "chisel-versions": ["v1.0.0","main"]}
     ]
+  SPLITS: "20"
 
 jobs:
   prepare-install:
@@ -163,6 +164,7 @@ jobs:
 
           # Configure the path of install_slices script
           ln -s "${{ env.script-dir }}/install_slices.py" install-slices
+          ln -s "${{ env.script-dir }}/split.py" split
 
       # TODO: As we are installing the slices for every (ref, arch), when
       #   installing all slices, we are also checking the existence of every
@@ -181,14 +183,19 @@ jobs:
             # Install all slices in slices/ dir.
             # We need to enable globstar to use the ** patterns below.
             shopt -s globstar
-            ./install-slices --arch "${{ matrix.arch }}" --release ./ \
-              --ensure-existence \
-              --ignore-missing \
-              slices/**/*.yaml
+            ./split "${{ matrix.id }}" "${{ env.SPLITS }}" slices/**/*.yaml |
+              xargs ./install-slices \
+                --arch "${{ matrix.arch }}" \
+                --release ./ \
+                --ensure-existence \
+                --ignore-missing
           elif [[ "${{ steps.changed-paths.outputs.slices }}" == "true" ]]; then
             # Install slices from changed files.
-            ./install-slices --arch "${{ matrix.arch }}" --release ./ \
-              --ensure-existence \
-              --ignore-missing \
-              ${{ steps.changed-paths.outputs.slices_files }}
+            ./split "${{ matrix.id }}" "${{ env.SPLITS }}" \
+              ${{ steps.changed-paths.outputs.slices_files }} |
+              xargs ./install-slices \
+                --arch "${{ matrix.arch }}" \
+                --release ./ \
+                --ensure-existence \
+                --ignore-missing \
           fi
